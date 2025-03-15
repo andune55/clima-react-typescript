@@ -13,6 +13,9 @@
     font-weight: 400;
     border-radius: 1rem;
 }
+.form select option{
+    color: #000000;
+}
 
 .field ::placeholder{
     color: var(--white);
