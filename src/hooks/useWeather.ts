@@ -1,21 +1,23 @@
 import axios from "axios"
 import { z } from 'zod'
+//import { object, string, number, InferOutput, parse } from 'valibot'
 import { SearchType } from "../Types"
+import { useState, useMemo } from "react"
 
 // TYPE GUARD O ASSERTION
-// function isWeatherResponse(weather : unknown) : weather is Weather{
-//     return(        
-//         Boolean(weather) &&         //que weather exista, que le hayamos pasado algo
-//         typeof weather === 'object' && //que sea un objeto
-//         typeof (weather as Weather).name === 'string' && //accedemos a cada uno de los elementos revisando que el nombre sea un string, que las 3 temepraturas sean números
-//         typeof (weather as Weather).main.temp === 'number' &&
-//         typeof (weather as Weather).main.temp_min === 'number' &&
-//         typeof (weather as Weather).main.temp_max === 'number' 
-//     )
-// }
+    // function isWeatherResponse(weather : unknown) : weather is Weather{
+    //     return(        
+    //         Boolean(weather) &&         //que weather exista, que le hayamos pasado algo
+    //         typeof weather === 'object' && //que sea un objeto
+    //         typeof (weather as Weather).name === 'string' && //accedemos a cada uno de los elementos revisando que el nombre sea un string, que las 3 temepraturas sean números
+    //         typeof (weather as Weather).main.temp === 'number' &&
+    //         typeof (weather as Weather).main.temp_min === 'number' &&
+    //         typeof (weather as Weather).main.temp_max === 'number' 
+    //     )
+    // }
 
-//Zod
-    const Weather = z.object({
+//ZOD
+    const WeatherSchema = z.object({
         name: z.string(),
         main: z.object({
             temp: z.number(),
@@ -23,10 +25,31 @@ import { SearchType } from "../Types"
             temp_min: z.number()
         })
     })
-    type Weather = z.infer<typeof Weather>
+    export type Weather = z.infer<typeof WeatherSchema>
+
+//Valibot
+    // const WeatherSchema = object({
+    //     name: string(),
+    //     main: object({
+    //         temp: number(),
+    //         temp_max: number(),
+    //         temp_min: number()
+    //     })
+    // })
+    // type Weather = InferOutput<typeof WeatherSchema>
+
     
 
 export default function useWeather(){
+
+    const [weather, setWeather] = useState<Weather>({
+        name: '',
+        main: {
+            temp: 0,
+            temp_max: 0, 
+            temp_min: 0
+        }
+    })
 
     const fetchWeather = async (search: SearchType) => {
         const appId = import.meta.env.VITE_API_KEY
@@ -58,14 +81,25 @@ export default function useWeather(){
 
             //3. Zod
                 const{data: weatherResult} = await axios(weatherUrl)
-                const result = Weather.safeParse(weatherResult)
+                const result = WeatherSchema.safeParse(weatherResult)
                 //console.log(result)
                 if(result.success){
-                    console.log(result.data.name)
-                    console.log(result.data.main.temp)
+                    //console.log(result.data.name)
+                    //console.log(result.data.main.temp)
+                    setWeather(result.data)
                 }else {
-                console.log('Respuesta mal formada...')
-            }
+                    console.log('Respuesta mal formada...')
+                }
+            //4. Valibot
+                // const{data: weatherResult} = await axios(weatherUrl)
+                // const result = parse(WeatherSchema, weatherResult)
+                // //console.log(result)
+                // if(result){
+                // console.log(result.name)
+                // console.log(result.main.temp)
+                // }else {
+                //     console.log('Respuesta mal formada...')
+                // }
 
          
         } catch (error) {
@@ -73,7 +107,11 @@ export default function useWeather(){
         }
     }
 
+    const hasWeatherData = useMemo(() => weather.name , [weather])
+
     return {
-        fetchWeather
+        weather,
+        fetchWeather,
+        hasWeatherData
     }
 }
