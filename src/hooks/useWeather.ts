@@ -38,21 +38,25 @@ import { useState, useMemo } from "react"
     // })
     // type Weather = InferOutput<typeof WeatherSchema>
 
-    
+const initialState = {
+    name: '',
+    main: {
+        temp: 0,
+        temp_max: 0, 
+        temp_min: 0
+    }
+}
 
 export default function useWeather(){
 
-    const [weather, setWeather] = useState<Weather>({
-        name: '',
-        main: {
-            temp: 0,
-            temp_max: 0, 
-            temp_min: 0
-        }
-    })
+    const [weather, setWeather] = useState<Weather>(initialState)
+
+    const [loading, setLoading] = useState(false)
 
     const fetchWeather = async (search: SearchType) => {
         const appId = import.meta.env.VITE_API_KEY
+        setLoading(true)
+        setWeather(initialState)
         try {
             const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${search.city},${search.country}&appid=${appId}`  
             console.log(geoUrl)
@@ -104,13 +108,16 @@ export default function useWeather(){
          
         } catch (error) {
             console.log(error)
-        }
+        } finally {
+            setLoading(false)
+        }    
     }
 
     const hasWeatherData = useMemo(() => weather.name , [weather])
 
     return {
         weather,
+        loading,
         fetchWeather,
         hasWeatherData
     }
