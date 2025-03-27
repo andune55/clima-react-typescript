@@ -3,7 +3,6 @@
     flex-direction: column;
     gap: 2rem;
 }
-
 .form input[type='text'],.form select{
     padding: 1rem;
     background-color: transparent;
@@ -16,11 +15,9 @@
 .form select option{
     color: #000000;
 }
-
 .field ::placeholder{
     color: var(--white);
 }
-
 .submit{
     background-color: var(--primary);
     border: none;
