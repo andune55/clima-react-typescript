@@ -61,6 +61,7 @@ export default function useWeather(){
             const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${search.city},${search.country}&appid=${appId}`  
             //console.log(geoUrl)
             const {data} = await axios.get(geoUrl)
+            //console.log(data)
 
             //Comprobar si existe
             if(!data[0]){
@@ -91,9 +92,11 @@ export default function useWeather(){
 
             //3. Zod
                 const{data: weatherResult} = await axios(weatherUrl)
+                console.log(weatherResult)
                 const result = WeatherSchema.safeParse(weatherResult)
                 //console.log(result)
                 if(result.success){
+                    //console.log(result.data)
                     //console.log(result.data.name)
                     //console.log(result.data.main.temp)
                     setWeather(result.data)
